@@ -1,0 +1,8 @@
+*.iml
+/VideoStreamAndroid/.gradle
+/VideoStreamAndroid/local.properties
+/VideoStreamAndroid/.idea/workspace.xml
+/VideoStreamAndroid/.idea/libraries
+/VideoStreamAndroid/build
+/VideoStreamDesktop/dist
+/VideoStreamDesktop/nbproject/private
