@@ -20,7 +20,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import hu.rics.camera1util.CameraPreview;
 import hu.rics.camera1util.MediaRecorderWrapper;
 
 public class MainActivity extends AppCompatActivity implements View.OnClickListener {

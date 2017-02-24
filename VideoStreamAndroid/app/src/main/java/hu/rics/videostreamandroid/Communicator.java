@@ -7,10 +7,6 @@ import java.io.BufferedOutputStream;
 import java.io.IOException;
 import java.net.Socket;
 
-import hu.rics.videostreamandroid.MainActivity;
-
-import static android.os.Build.HOST;
-
 /**
  * Created by rics on 2017.01.31..
  */

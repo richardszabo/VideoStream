@@ -6,7 +6,6 @@ import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.awt.image.BufferedImage;
 import java.io.BufferedInputStream;
-import java.io.FileOutputStream;
 import java.net.ServerSocket;
 import java.net.Socket;
  
@@ -23,8 +22,8 @@ import javax.swing.SwingUtilities;
  * @author rics
  */
 public class VideoStreamReceiverDesktop {
-    private static final int WIDTH = 320;
-    private static final int HEIGHT = 240;
+    private static final int WIDTH = 1280;
+    private static final int HEIGHT = 720;
     private static final int NUM_PIXELS = WIDTH * HEIGHT;
     private static final int BUFFER_SIZE = NUM_PIXELS * 3/2;
     private static final int PORT = 55555;
