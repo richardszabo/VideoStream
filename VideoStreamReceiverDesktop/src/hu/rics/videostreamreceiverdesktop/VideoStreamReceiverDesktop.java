@@ -1,4 +1,4 @@
-package hu.rics.videostreamdesktop;
+package hu.rics.videostreamreceiverdesktop;
  
 import java.awt.Dimension;
 import java.awt.Graphics;
@@ -22,7 +22,7 @@ import javax.swing.SwingUtilities;
  * 
  * @author rics
  */
-public class VideoStreamDesktop {
+public class VideoStreamReceiverDesktop {
     private static final int WIDTH = 320;
     private static final int HEIGHT = 240;
     private static final int NUM_PIXELS = WIDTH * HEIGHT;
@@ -38,7 +38,7 @@ public class VideoStreamDesktop {
     private CameraPanel panel = new CameraPanel();
     private JFrame frame;
  
-    public VideoStreamDesktop() {  
+    public VideoStreamReceiverDesktop() {  
         try {
             ss = new ServerSocket(PORT);
             System.out.println("before accept");
@@ -196,14 +196,14 @@ public class VideoStreamDesktop {
         protected void paintComponent(Graphics g) {
             super.paintComponent(g);
             // Ensure that we don't paint while the image is being refreshed
-            synchronized(VideoStreamDesktop.this) {
+            synchronized(VideoStreamReceiverDesktop.this) {
                 g.drawImage(image, 0, 0, null);
             }
         }   
     }
  
     public static void main(String[] args) {    
-        final VideoStreamDesktop videoStreamDesktop = new VideoStreamDesktop();
+        final VideoStreamReceiverDesktop videoStreamDesktop = new VideoStreamReceiverDesktop();
         SwingUtilities.invokeLater(new Runnable() {
             @Override
             public void run() {
