@@ -20,6 +20,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import hu.rics.camera1util.CameraPreview;
 import hu.rics.camera1util.MediaRecorderWrapper;
 
 public class MainActivity extends AppCompatActivity implements View.OnClickListener {
@@ -31,6 +32,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     File sdcardLocation;
     final private int REQUEST_CODE_ASK_MULTIPLE_PERMISSIONS = 123;
     boolean hasRights = false;
+    StreamingCameraPreview streamingCameraPreview;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -38,7 +40,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         setContentView(R.layout.activity_main);
         if( requestPermission() ) {
             hasRights = true;
-            mediaRecorderWrapper = new MediaRecorderWrapper(this,R.id.camera_preview);
+            streamingCameraPreview = new StreamingCameraPreview(this);
+            mediaRecorderWrapper = new MediaRecorderWrapper(this,R.id.camera_preview,streamingCameraPreview);
         }
         startButton = (Button) findViewById(R.id.start_button);
         startButton.setOnClickListener(this);
@@ -47,7 +50,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     @Override
     public void onResume() {
         super.onResume();
-        if( hasRights ) {
+        if( hasRights && mediaRecorderWrapper != null ) {
             mediaRecorderWrapper.startPreview();
         }
     }
@@ -55,14 +58,14 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     @Override
     protected void onPause() {
         super.onPause();
-        if( hasRights ) {
+        if( hasRights && mediaRecorderWrapper != null ) {
             mediaRecorderWrapper.stopPreview();
         }
     }
 
     @Override
     public void onClick(View v) {
-        if( !hasRights ) {
+        if( !(hasRights && mediaRecorderWrapper != null) ) {
             return;
         }
         if( mediaRecorderWrapper.isRecording() ) {
@@ -94,6 +97,10 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         if (!addPermission(permissionsList, Manifest.permission.RECORD_AUDIO)) {
             Log.i(TAG,"permissionsNeeded.add(\"Audio\");");
             permissionsNeeded.add("Audio");
+        }
+        if (!addPermission(permissionsList, Manifest.permission.INTERNET)) {
+            Log.i(TAG,"permissionsNeeded.add(\"Internet\");");
+            permissionsNeeded.add("Internet");
         }
         Log.i(TAG,"onCreate:" + permissionsList.size() + ":" + permissionsNeeded.size());
         if (permissionsList.size() > 0) {
@@ -148,6 +155,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 perms.put(Manifest.permission.CAMERA, PackageManager.PERMISSION_GRANTED);
                 perms.put(Manifest.permission.WRITE_EXTERNAL_STORAGE, PackageManager.PERMISSION_GRANTED);
                 perms.put(Manifest.permission.RECORD_AUDIO, PackageManager.PERMISSION_GRANTED);
+                perms.put(Manifest.permission.INTERNET, PackageManager.PERMISSION_GRANTED);
                 // Fill with results
                 for (int i = 0; i < permissions.length; i++) {
                     Log.i(TAG,"i:" + i + ":" + permissions[i] + ":" + grantResults[i] );
@@ -156,7 +164,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 // Check for ACCESS_FINE_LOCATION
                 if( perms.get(Manifest.permission.CAMERA) == PackageManager.PERMISSION_GRANTED
                         && perms.get(Manifest.permission.WRITE_EXTERNAL_STORAGE) == PackageManager.PERMISSION_GRANTED
-                        && perms.get(Manifest.permission.RECORD_AUDIO) == PackageManager.PERMISSION_GRANTED) {
+                        && perms.get(Manifest.permission.RECORD_AUDIO) == PackageManager.PERMISSION_GRANTED
+                        && perms.get(Manifest.permission.INTERNET) == PackageManager.PERMISSION_GRANTED) {
                     // All Permissions Granted
                     hasRights = true;
                 } else {
