@@ -23,10 +23,6 @@ import javax.swing.SwingUtilities;
  * @author rics
  */
 public class VideoStreamReceiverDesktop {
-    /*private static final int WIDTH = 640;
-    private static final int HEIGHT = 480;
-    private static final int NUM_PIXELS = WIDTH * HEIGHT;
-    private static final int BUFFER_SIZE = NUM_PIXELS * 3/2;*/
     private static final int PORT = 55556;
  
     private ServerSocket ss;
@@ -36,8 +32,7 @@ public class VideoStreamReceiverDesktop {
     private int numPixels;
     private int bufferSize;
     
-    private byte[] buffer; //= new byte[BUFFER_SIZE];
-    private int[] pixels; // = new int[NUM_PIXELS];
+    private byte[] buffer; 
     private BufferedInputStream bis;
     private DataInputStream dis;
     private boolean sizeSent;
@@ -104,19 +99,6 @@ public class VideoStreamReceiverDesktop {
         return 0xff000000 | (r<<16) | (g<<8) | b;
     }
     
-/*private int convertYUVtoARGB(int y, int u, int v) {
-        int c = y&0xFF - 16;
-        int d = u&0xFF - 128;
-        int e = v&0xFF - 128;
-        int r = (298*c+409*e+128)/256;
-        int g = (298*c-100*d-208*e+128)/256;
-        int b = (298*c+516*d+128)/256;
-        r = r>255? 255 : r<0 ? 0 : r;
-        g = g>255? 255 : g<0 ? 0 : g;
-        b = b>255? 255 : b<0 ? 0 : b;
-        return 0xff000000 | (r<<16) | (g<<8) | b;        
-    }*/
-
     public void run() {
         int i = 0;
         while(true) {
@@ -128,7 +110,6 @@ public class VideoStreamReceiverDesktop {
                             height = dis.readInt();
                             System.out.println("width: " + width + " height: " + height);
                             numPixels = width * height;
-                            pixels = new int[numPixels];
                             bufferSize = numPixels * 3 / 2;
                             buffer = new byte[bufferSize];
                             SwingUtilities.invokeLater(new Runnable() {
@@ -170,51 +151,6 @@ public class VideoStreamReceiverDesktop {
         }    
     }
     
-    //http://www.41post.com/3470/programming/android-retrieving-the-camera-preview-as-a-pixel-array  
-    //Method from Ketai project! Not mine! See below...  
-    // ugly and working
-    /*void decodeYUV420SP(BufferedImage image, byte[] yuv420sp, int width, int height) {
-
-        final int frameSize = width * height;
-
-        for (int j = 0, yp = 0; j < height; j++) {
-            int uvp = frameSize + (j >> 1) * width, u = 0, v = 0;
-            for (int i = 0; i < width; i++, yp++) {
-                int y = (0xff & ((int) yuv420sp[yp])) - 16;
-                if (y < 0) {
-                    y = 0;
-                }
-                if ((i & 1) == 0) {
-                    v = (0xff & yuv420sp[uvp++]) - 128;
-                    u = (0xff & yuv420sp[uvp++]) - 128;
-                }
-
-                int y1192 = 1192 * y;
-                int r = (y1192 + 1634 * v);
-                int g = (y1192 - 833 * v - 400 * u);
-                int b = (y1192 + 2066 * u);
-
-                if (r < 0) {
-                    r = 0;
-                } else if (r > 262143) {
-                    r = 262143;
-                }
-                if (g < 0) {
-                    g = 0;
-                } else if (g > 262143) {
-                    g = 262143;
-                }
-                if (b < 0) {
-                    b = 0;
-                } else if (b > 262143) {
-                    b = 262143;
-                }
-
-                image.setRGB(yp%WIDTH,yp/WIDTH,0xff000000 | ((r << 6) & 0xff0000) | ((g >> 2) & 0xff00) | ((b >> 10) & 0xff));
-            }
-        }
-    }*/
-
     class CameraPanel extends JPanel {
         private static final long serialVersionUID = 1L;
  
