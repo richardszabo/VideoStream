@@ -23,9 +23,9 @@ public class Communicator extends AsyncTask<Void, Void, Boolean> {
     @Override
     protected Boolean doInBackground(Void... params) {
         try {
-            Log.e(MainActivity.TAG,"Trying to connect to " + HOST + ":" + PORT);
+            Log.i(MainActivity.TAG,"Trying to connect to " + HOST + ":" + PORT);
             sock = new Socket(HOST, PORT);
-            Log.e(MainActivity.TAG,"Connected:" + sock);
+            Log.i(MainActivity.TAG,"Connected:" + sock);
             bos = new BufferedOutputStream(sock.getOutputStream());
             dos = new DataOutputStream(bos);
             return true;
