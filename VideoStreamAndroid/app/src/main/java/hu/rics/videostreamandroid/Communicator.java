@@ -4,6 +4,7 @@ import android.os.AsyncTask;
 import android.util.Log;
 
 import java.io.BufferedOutputStream;
+import java.io.DataOutputStream;
 import java.io.IOException;
 import java.net.Socket;
 
@@ -12,10 +13,11 @@ import java.net.Socket;
  */
 
 public class Communicator extends AsyncTask<Void, Void, Boolean> {
-    private static final String HOST = "192.168.0.106";
-    private static final int PORT = 55555;
+    private static final String HOST = "192.168.0.107";
+    private static final int PORT = 55556;
     Socket sock;
     BufferedOutputStream bos;
+    DataOutputStream dos;
     private boolean isConnected = false;
 
     @Override
@@ -25,6 +27,7 @@ public class Communicator extends AsyncTask<Void, Void, Boolean> {
             sock = new Socket(HOST, PORT);
             Log.e(MainActivity.TAG,"Connected:" + sock);
             bos = new BufferedOutputStream(sock.getOutputStream());
+            dos = new DataOutputStream(bos);
             return true;
         } catch(IOException ioe) {
             Log.e(MainActivity.TAG,"Cannot connect:" + ioe.toString());
@@ -54,4 +57,9 @@ public class Communicator extends AsyncTask<Void, Void, Boolean> {
     BufferedOutputStream getBufferedOutputStream() {
         return bos;
     }
+
+    DataOutputStream getDataOutputStream() {
+        return dos;
+    }
+
 }

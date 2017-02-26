@@ -6,6 +6,7 @@ import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.awt.image.BufferedImage;
 import java.io.BufferedInputStream;
+import java.io.DataInputStream;
 import java.net.ServerSocket;
 import java.net.Socket;
  
@@ -22,17 +23,24 @@ import javax.swing.SwingUtilities;
  * @author rics
  */
 public class VideoStreamReceiverDesktop {
-    private static final int WIDTH = 1280;
-    private static final int HEIGHT = 720;
+    /*private static final int WIDTH = 640;
+    private static final int HEIGHT = 480;
     private static final int NUM_PIXELS = WIDTH * HEIGHT;
-    private static final int BUFFER_SIZE = NUM_PIXELS * 3/2;
-    private static final int PORT = 55555;
+    private static final int BUFFER_SIZE = NUM_PIXELS * 3/2;*/
+    private static final int PORT = 55556;
  
     private ServerSocket ss;
     private Socket sock;
-    private byte[] buffer = new byte[BUFFER_SIZE];
-    private int[] pixels = new int[NUM_PIXELS];
+    private int width;
+    private int height;
+    private int numPixels;
+    private int bufferSize;
+    
+    private byte[] buffer; //= new byte[BUFFER_SIZE];
+    private int[] pixels; // = new int[NUM_PIXELS];
     private BufferedInputStream bis;
+    private DataInputStream dis;
+    private boolean sizeSent;
     private BufferedImage image;
     private CameraPanel panel = new CameraPanel();
     private JFrame frame;
@@ -44,19 +52,19 @@ public class VideoStreamReceiverDesktop {
             sock = ss.accept();
             System.out.println("after accept");
             bis = new BufferedInputStream(sock.getInputStream());
+            dis = new DataInputStream(bis);
         } catch (Exception e) {
             System.err.println("Failed to connect: " + e);
             System.exit(1);
-        }
- 
-        image = new BufferedImage(WIDTH, HEIGHT, BufferedImage.TYPE_INT_RGB);
+        } 
     }
  
     public void createAndShowGUI() {
+        image = new BufferedImage(width, height, BufferedImage.TYPE_INT_RGB);        
         frame = new JFrame("EV3 Camera View");
  
         frame.getContentPane().add(panel);
-        frame.setPreferredSize(new Dimension(WIDTH, HEIGHT));
+        frame.setPreferredSize(new Dimension(width, height));
  
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         frame.addWindowListener(new WindowAdapter() {
@@ -114,11 +122,30 @@ public class VideoStreamReceiverDesktop {
         while(true) {
             synchronized (this) {
                 try {
-                    int offset = 0;
-                    while (offset < BUFFER_SIZE) {
-                        offset += bis.read(buffer, offset, BUFFER_SIZE - offset);
+                    if( !sizeSent ) {
+                        if( dis != null ) {
+                            width = dis.readInt();
+                            height = dis.readInt();
+                            System.out.println("width: " + width + " height: " + height);
+                            numPixels = width * height;
+                            pixels = new int[numPixels];
+                            bufferSize = numPixels * 3 / 2;
+                            buffer = new byte[bufferSize];
+                            SwingUtilities.invokeLater(new Runnable() {
+                                @Override
+                                public void run() {
+                                    createAndShowGUI(); 
+                                }
+                            });
+                            sizeSent = true;                            
+                        }
+                    } else {
+                        int offset = 0;
+                        while (offset < bufferSize) {
+                            offset += bis.read(buffer, offset, bufferSize - offset);
+                        }
+                        decodeYUV420SP(image,buffer,width,height);
                     }
-                    decodeYUV420SP(image,buffer,WIDTH,HEIGHT);
                 } catch (Exception e) {
                     break;
                 }
@@ -203,12 +230,6 @@ public class VideoStreamReceiverDesktop {
  
     public static void main(String[] args) {    
         final VideoStreamReceiverDesktop videoStreamDesktop = new VideoStreamReceiverDesktop();
-        SwingUtilities.invokeLater(new Runnable() {
-            @Override
-            public void run() {
-                videoStreamDesktop.createAndShowGUI(); 
-            }
-        });
         videoStreamDesktop.run();
     }
 }

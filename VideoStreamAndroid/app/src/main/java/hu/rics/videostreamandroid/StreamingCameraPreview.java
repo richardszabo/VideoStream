@@ -6,9 +6,12 @@ import android.util.Log;
 import android.view.SurfaceHolder;
 
 import java.io.BufferedOutputStream;
+import java.io.DataOutputStream;
 import java.io.IOException;
+import java.io.OutputStream;
 
 import hu.rics.camera1util.CameraPreview;
+import hu.rics.camera1util.LibraryInfo;
 
 /**
  * Created by rics on 2017.02.17..
@@ -16,6 +19,7 @@ import hu.rics.camera1util.CameraPreview;
 public class StreamingCameraPreview extends CameraPreview implements SurfaceHolder.Callback, Camera.PreviewCallback {
 
     Communicator communicator;
+    boolean sizeSent;
 
     public StreamingCameraPreview(Context context) {
         super(context);
@@ -54,9 +58,21 @@ public class StreamingCameraPreview extends CameraPreview implements SurfaceHold
         if( communicator != null ) {
             try {
                 BufferedOutputStream bos = communicator.getBufferedOutputStream();
-                if (bos != null) {
-                    bos.write(data);
-                    bos.flush();
+                DataOutputStream dos = communicator.getDataOutputStream();
+                if( !sizeSent ) {
+                    if( dos != null ) {
+                        Camera.Size size = camera.getParameters().getPreviewSize();
+                        Log.i(LibraryInfo.TAG,"width: " + size.width + " height: " + size.height);
+                        dos.writeInt (size.width);
+                        dos.writeInt (size.height);
+                        dos.flush();
+                        sizeSent = true;
+                    }
+                } else {
+                    if (bos != null) {
+                        bos.write(data);
+                        bos.flush();
+                    }
                 }
             } catch (IOException ioe) {
                 Log.e(MainActivity.TAG, "Cannot send data:" + ioe.toString());
