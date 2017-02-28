@@ -8,64 +8,75 @@ import java.io.DataOutputStream;
 import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Created by rics on 2017.01.31..
  */
 
-public class Communicator extends AsyncTask<Void, Void, Boolean> {
+public class Communicator extends AsyncTask<Void, Void, Void> {
     private static final int PORT = 55556;
     ServerSocket serverSocket;
-    Socket socket;
-    BufferedOutputStream bos;
-    DataOutputStream dos;
-    private boolean isConnected = false;
+    List<StreamingConnection> connections = new ArrayList<>();
 
     @Override
-    protected Boolean doInBackground(Void... params) {
+    protected Void doInBackground(Void... params) {
         try {
             serverSocket = new ServerSocket(PORT);
         } catch (IOException e) {
             Log.e(MainActivity.TAG,"Cannot initiate server:" + e.toString());
             e.printStackTrace();
         }
-        try {
-            socket = serverSocket.accept();
-            bos = new BufferedOutputStream(socket.getOutputStream());
-            dos = new DataOutputStream(bos);
-            return true;
-        } catch(IOException ioe) {
-            Log.e(MainActivity.TAG,"Cannot connect:" + ioe.toString());
+        while(true) {
+            try {
+                Socket socket = serverSocket.accept();
+                connections.add(new StreamingConnection(socket));
+            } catch (IOException ioe) {
+                Log.e(MainActivity.TAG, "Cannot connect new client:" + ioe.toString());
+                break;
+            }
         }
-        return false;
-    }
-
-    @Override
-    public void onPostExecute(Boolean result) {
-        super.onPostExecute(result);
-
-        if( result ) {
-            isConnected = true;
-        }
-        Log.i(MainActivity.TAG,"Connection state:" + isConnected);
-    }
-
-    boolean isConnected() {
-        return isConnected;
+        return null;
     }
 
     void close() throws IOException {
-        bos.close();
-        socket.close();
+        for (StreamingConnection connection:connections ) {
+            connection.close();
+        }
         serverSocket.close();
     }
 
-    BufferedOutputStream getBufferedOutputStream() {
-        return bos;
+    class StreamingConnection {
+        Socket socket;
+        BufferedOutputStream bos;
+        DataOutputStream dos;
+        boolean inited;
+
+        StreamingConnection(Socket socket) {
+            this.socket = socket;
+            try {
+                bos = new BufferedOutputStream(socket.getOutputStream());
+            } catch (IOException e) {
+                Log.e(MainActivity.TAG,"Cannot connect:" + e.toString());
+                e.printStackTrace();
+            }
+            dos = new DataOutputStream(bos);
+        }
+
+        BufferedOutputStream getBufferedOutputStream() { return bos; }
+
+        DataOutputStream getDataOutputStream() {
+            return dos;
+        }
+
+        void close() throws IOException {
+            bos.close();
+            socket.close();
+        }
     }
 
-    DataOutputStream getDataOutputStream() {
-        return dos;
+    List<StreamingConnection> getConnections() {
+        return connections;
     }
-
 }

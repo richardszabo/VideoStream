@@ -9,6 +9,7 @@ import java.io.BufferedOutputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
+import java.util.Iterator;
 
 import hu.rics.camera1util.CameraPreview;
 import hu.rics.camera1util.LibraryInfo;
@@ -22,7 +23,6 @@ import static android.R.attr.width;
 public class StreamingCameraPreview extends CameraPreview implements SurfaceHolder.Callback, Camera.PreviewCallback {
 
     Communicator communicator;
-    boolean sizeSent;
     Context context;
     int rotation;
 
@@ -62,40 +62,46 @@ public class StreamingCameraPreview extends CameraPreview implements SurfaceHold
     public void onPreviewFrame(byte[] data, Camera camera) {
         Log.d(MainActivity.TAG,"StreamingCameraPreview.onPreviewFrame:" + data.length + ":");
         if( communicator != null ) {
-            try {
-                BufferedOutputStream bos = communicator.getBufferedOutputStream();
-                DataOutputStream dos = communicator.getDataOutputStream();
-                Camera.Size size = camera.getParameters().getPreviewSize();
-                if( !sizeSent ) {
-                    if( dos != null ) {
-
-                        rotation = CameraPreview.getCameraDisplayOrientation(context, MediaRecorderWrapper.CAMERA_ID,camera);
-                        assert rotation % 90 == 0; // assuming that getCameraDisplayOrientation return a multiplier of 90
-                        Log.i(LibraryInfo.TAG,"width: " + size.width + " height: " + size.height + ":" +
-                                CameraPreview.getCameraDisplayOrientation(context, MediaRecorderWrapper.CAMERA_ID,camera));
-                        if( rotation / 90 % 2 != 0 ) {
-                            int tmp = size.width;
-                            size.width = size.height;
-                            size.height = tmp;
+            Iterator<Communicator.StreamingConnection> c = communicator.getConnections().iterator();
+            while (c.hasNext() ) {
+                Communicator.StreamingConnection connection = c.next();
+                if( connection != null ) {
+                    BufferedOutputStream bos = connection.getBufferedOutputStream();
+                    DataOutputStream dos = connection.getDataOutputStream();
+                    Camera.Size size = camera.getParameters().getPreviewSize();
+                    try {
+                        if( !connection.inited ) {
+                            if( dos != null ) {
+                                rotation = CameraPreview.getCameraDisplayOrientation(context, MediaRecorderWrapper.CAMERA_ID,camera);
+                                assert rotation % 90 == 0; // assuming that getCameraDisplayOrientation return a multiplier of 90
+                                Log.i(LibraryInfo.TAG,"width: " + size.width + " height: " + size.height + ":" +
+                                        CameraPreview.getCameraDisplayOrientation(context, MediaRecorderWrapper.CAMERA_ID,camera));
+                                if( rotation / 90 % 2 != 0 ) {
+                                    int tmp = size.width;
+                                    size.width = size.height;
+                                    size.height = tmp;
+                                }
+                                dos.writeInt (size.width);
+                                dos.writeInt (size.height);
+                                dos.flush();
+                                connection.inited = true;
+                            }
+                        } else {
+                            if (bos != null) {
+                                byte []rotated;
+                                rotated = data;
+                                for( int i = 0; i < rotation/90; ++i ) {
+                                    rotated = rotateYUV420Degree90(rotated,size.width,size.height);
+                                }
+                                bos.write(rotated);
+                                bos.flush();
+                            }
                         }
-                        dos.writeInt (size.width);
-                        dos.writeInt (size.height);
-                        dos.flush();
-                        sizeSent = true;
-                    }
-                } else {
-                    if (bos != null) {
-                        byte []rotated;
-                        rotated = data;
-                        for( int i = 0; i < rotation/90; ++i ) {
-                            rotated = rotateYUV420Degree90(rotated,size.width,size.height);
-                        }
-                        bos.write(rotated);
-                        bos.flush();
+                    } catch (IOException ioe) {
+                        Log.e(MainActivity.TAG, "Cannot send data:" + ioe.toString());
+                        c.remove();
                     }
                 }
-            } catch (IOException ioe) {
-                Log.e(MainActivity.TAG, "Cannot send data:" + ioe.toString());
             }
         }
     }
@@ -106,20 +112,16 @@ public class StreamingCameraPreview extends CameraPreview implements SurfaceHold
         byte [] yuv = new byte[imageWidth*imageHeight*3/2];
         // Rotate the Y luma
         int i = 0;
-        for(int x = 0;x < imageWidth;x++)
-        {
-            for(int y = imageHeight-1;y >= 0;y--)
-            {
+        for(int x = 0;x < imageWidth;x++) {
+            for(int y = imageHeight-1;y >= 0;y--) {
                 yuv[i] = data[y*imageWidth+x];
                 i++;
             }
         }
         // Rotate the U and V color components
         i = imageWidth*imageHeight*3/2-1;
-        for(int x = imageWidth-1;x > 0;x=x-2)
-        {
-            for(int y = 0;y < imageHeight/2;y++)
-            {
+        for(int x = imageWidth-1;x > 0;x=x-2) {
+            for(int y = 0;y < imageHeight/2;y++) {
                 yuv[i] = data[(imageWidth*imageHeight)+(y*imageWidth)+x];
                 i--;
                 yuv[i] = data[(imageWidth*imageHeight)+(y*imageWidth)+(x-1)];
