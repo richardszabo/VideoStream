@@ -2,16 +2,23 @@ package hu.rics.videostreamreceiverdesktop;
  
 import java.awt.Dimension;
 import java.awt.Graphics;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.awt.image.BufferedImage;
 import java.io.BufferedInputStream;
 import java.io.DataInputStream;
+import java.io.IOException;
 import java.net.Socket;
+import javax.swing.BoxLayout;
+import javax.swing.JButton;
  
 import javax.swing.JFrame;
 import javax.swing.JPanel;
+import javax.swing.JTextField;
 import javax.swing.SwingUtilities;
+import javax.swing.SwingWorker;
  
 /**
  * Based on this: https://lejosnews.wordpress.com/2014/09/04/webcam-streaming/
@@ -22,7 +29,7 @@ import javax.swing.SwingUtilities;
  * @author rics
  */
 public class VideoStreamReceiverDesktop {
-    private static final String HOST = "192.168.0.101";
+    private static final String DEFAULT_HOST = "192.168.0.101";
     private static final int PORT = 55556;
  
     private Socket socket;
@@ -34,29 +41,28 @@ public class VideoStreamReceiverDesktop {
     private byte[] buffer; 
     private BufferedInputStream bis;
     private DataInputStream dis;
-    private boolean sizeSent;
     private BufferedImage image;
-    private CameraPanel panel = new CameraPanel();
+    final private CameraPanel panel = new CameraPanel();
     private JFrame frame;
- 
-    public VideoStreamReceiverDesktop() {  
-        try {
-            socket = new Socket(HOST,PORT);
-            bis = new BufferedInputStream(socket.getInputStream());
-            dis = new DataInputStream(bis);
-        } catch (Exception e) {
-            System.err.println("Failed to connect: " + e);
-            System.exit(1);
-        } 
-    }
- 
-    public void createAndShowGUI() {
-        image = new BufferedImage(width, height, BufferedImage.TYPE_INT_RGB);        
+    private JTextField ipTextField;
+    private JButton connectButton;
+  
+    private void createAndShowGUI() {
         frame = new JFrame("EV3 Camera View");
  
-        frame.getContentPane().add(panel);
-        frame.setPreferredSize(new Dimension(width, height));
- 
+        ipTextField = new JTextField(DEFAULT_HOST);
+        frame.setLayout(new BoxLayout(frame.getContentPane(),BoxLayout.Y_AXIS));
+        frame.add(ipTextField);
+        connectButton = new JButton("Connect");
+        connectButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                new ImageUpdater().execute();
+            }
+        });
+        frame.add(connectButton);
+        frame.add(panel);
+
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         frame.addWindowListener(new WindowAdapter() {
             @Override
@@ -68,8 +74,15 @@ public class VideoStreamReceiverDesktop {
         frame.pack();
         frame.setVisible(true);
     }
- 
-    public void close() {
+
+    private void updateGUI() {
+        image = new BufferedImage(width, height, BufferedImage.TYPE_INT_RGB);   
+        panel.setPreferredSize(new Dimension(width, height));        
+        frame.setPreferredSize(new Dimension(width, height+connectButton.getHeight() + ipTextField.getHeight()));
+        frame.pack();
+    }
+    
+    private void close() {
         try {
             if (bis != null) bis.close();
             if (socket != null) socket.close();
@@ -77,7 +90,65 @@ public class VideoStreamReceiverDesktop {
             System.err.println("Exception closing window: " + e1);
         }
     }
- 
+     
+    private boolean connect() {
+        try {
+            socket = new Socket(ipTextField.getText(),PORT);
+            bis = new BufferedInputStream(socket.getInputStream());
+            dis = new DataInputStream(bis);
+            System.out.println("Connected");
+            return true;
+        } catch (Exception e) {
+            System.err.println("Failed to connect: " + e);
+            return false;
+        }         
+    }
+    
+    private boolean getImageSize() {
+        if( dis != null ) {
+            try {
+                width = dis.readInt();
+                height = dis.readInt();
+                System.out.println("width: " + width + " height: " + height);
+                numPixels = width * height;
+                bufferSize = numPixels * 3 / 2;
+                buffer = new byte[bufferSize];                            
+                return true;
+            } catch (IOException ex) {
+                System.err.println("Failed to get image size: " + ex);
+            }
+        }        
+        return false;
+    }
+    
+    private void receiveImages() {        
+        while(true) {
+            synchronized (this) {
+                try {
+                    int offset = 0;
+                    while (offset < bufferSize) {
+                        offset += bis.read(buffer, offset, bufferSize - offset);
+                    }
+                    decodeYUV420SP(image,buffer,width,height);
+                } catch (Exception e) {
+                    break;
+                }
+            }
+            panel.repaint(1);
+        }
+    }
+    
+   class ImageUpdater extends SwingWorker<Void, Void> {
+       @Override
+       public Void doInBackground() {
+            if( connect() && getImageSize() ) {
+                updateGUI();                    
+                receiveImages();
+            }
+            return null;
+       }
+   }
+    
     // convertYUVtoARGB is taken from here:
     // https://en.wikipedia.org/wiki/YUV#Y.E2.80.B2UV420sp_.28NV21.29_to_RGB_conversion_.28Android.29
     private int convertYUVtoARGB(int y, int u, int v) {
@@ -93,49 +164,13 @@ public class VideoStreamReceiverDesktop {
         b = b>255? 255 : b<0 ? 0 : b;
         return 0xff000000 | (r<<16) | (g<<8) | b;
     }
-    
-    public void run() {
-        int i = 0;
-        while(true) {
-            synchronized (this) {
-                try {
-                    if( !sizeSent ) {
-                        if( dis != null ) {
-                            width = dis.readInt();
-                            height = dis.readInt();
-                            System.out.println("width: " + width + " height: " + height);
-                            numPixels = width * height;
-                            bufferSize = numPixels * 3 / 2;
-                            buffer = new byte[bufferSize];
-                            SwingUtilities.invokeLater(new Runnable() {
-                                @Override
-                                public void run() {
-                                    createAndShowGUI(); 
-                                }
-                            });
-                            sizeSent = true;                            
-                        }
-                    } else {
-                        int offset = 0;
-                        while (offset < bufferSize) {
-                            offset += bis.read(buffer, offset, bufferSize - offset);
-                        }
-                        decodeYUV420SP(image,buffer,width,height);
-                    }
-                } catch (Exception e) {
-                    break;
-                }
-            }
-            panel.repaint(1);
-        }
-    }
-        
+            
     // based on 
     // https://en.wikipedia.org/wiki/YUV#Y.E2.80.B2UV420p_.28and_Y.E2.80.B2V12_or_YV12.29_to_RGB888_conversion
     // YUV420SP aka NV21 pixel layout per channel is the following (for a 16 pixel image): 
     // 0123456789ABCDEF01234567
     // YYYYYYYYYYYYYYYYVUVUVUVU
-    void decodeYUV420SP(BufferedImage image, byte[] yuv420sp, int width, int height) {
+    private void decodeYUV420SP(BufferedImage image, byte[] yuv420sp, int width, int height) {
         for (int i = 0; i < height; ++i ) {
             for( int j = 0; j < width; ++j) {
                 int y = yuv420sp[i * width + j];
@@ -161,6 +196,11 @@ public class VideoStreamReceiverDesktop {
  
     public static void main(String[] args) {    
         final VideoStreamReceiverDesktop videoStreamDesktop = new VideoStreamReceiverDesktop();
-        videoStreamDesktop.run();
+        SwingUtilities.invokeLater(new Runnable() {
+            @Override
+            public void run() {
+                videoStreamDesktop.createAndShowGUI(); 
+            }
+        });        
     }
 }
