@@ -33,7 +33,7 @@ public class Communicator extends AsyncTask<Void, Void, Void> {
                 Socket socket = serverSocket.accept();
                 connections.add(new StreamingConnection(socket));
             } catch (IOException ioe) {
-                Log.e(MainActivity.TAG, "Cannot connect new client:" + ioe.toString());
+                Log.d(MainActivity.TAG, "Cannot connect new client:" + ioe.toString());
                 break;
             }
         }

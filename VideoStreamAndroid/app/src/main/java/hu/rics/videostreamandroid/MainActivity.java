@@ -71,28 +71,23 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     protected void onPause() {
         super.onPause();
         if( hasRights && mediaRecorderWrapper != null ) {
-            if( mediaRecorderWrapper.isRecording() ) {
-                mediaRecorderWrapper.stopRecording();
-            }
             mediaRecorderWrapper.stopPreview();
         }
     }
 
     @Override
     public void onClick(View v) {
-        if( !(hasRights && mediaRecorderWrapper != null) ) {
+        /*if( !(hasRights && mediaRecorderWrapper != null) ) {
             return;
         }
-        if( mediaRecorderWrapper.isRecording() ) {
-            mediaRecorderWrapper.stopRecording();
+        if( mediaRecorderWrapper.isPreview() ) {
+            mediaRecorderWrapper.stopPreview();
             startButton.setText("Start");
             finish();
         } else {
-            sdcardLocation = Environment.getExternalStorageDirectory();
-            File imageLocation = new File(sdcardLocation, defaultName);
-            mediaRecorderWrapper.startRecording(imageLocation.getAbsolutePath() + ext);
+            mediaRecorderWrapper.startPreview();
             startButton.setText("Stop");
-        }
+        }*/
     }
 
     boolean requestPermission() {

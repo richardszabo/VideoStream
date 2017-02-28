@@ -38,7 +38,9 @@ public class StreamingCameraPreview extends CameraPreview implements SurfaceHold
 
     public void stopSend() {
         try {
-            communicator.close();
+            if( communicator != null ) {
+                communicator.close();
+            }
             communicator = null;
         } catch (IOException e) {
             e.printStackTrace();
@@ -47,14 +49,16 @@ public class StreamingCameraPreview extends CameraPreview implements SurfaceHold
     }
 
     @Override
-    public void startRecording() {
-        Log.d(MainActivity.TAG,"StreamingCameraPreview.startRecording");
+    public void startPreview() {
+        super.startPreview();
+        Log.d(MainActivity.TAG,"StreamingCameraPreview.startSending");
         startSend();
     }
 
     @Override
-    public void stopRecording() {
-        Log.d(MainActivity.TAG,"StreamingCameraPreview.stopRecording");
+    public void stopPreview() {
+        super.stopPreview();
+        Log.d(MainActivity.TAG,"StreamingCameraPreview.stopSending");
         stopSend();
     }
 
@@ -98,7 +102,7 @@ public class StreamingCameraPreview extends CameraPreview implements SurfaceHold
                             }
                         }
                     } catch (IOException ioe) {
-                        Log.e(MainActivity.TAG, "Cannot send data:" + ioe.toString());
+                        Log.d(MainActivity.TAG, "Cannot send data:" + ioe.toString());
                         c.remove();
                     }
                 }
