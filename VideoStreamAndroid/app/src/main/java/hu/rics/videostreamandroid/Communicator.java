@@ -6,6 +6,7 @@ import android.util.Log;
 import java.io.BufferedOutputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
+import java.net.ServerSocket;
 import java.net.Socket;
 
 /**
@@ -13,9 +14,9 @@ import java.net.Socket;
  */
 
 public class Communicator extends AsyncTask<Void, Void, Boolean> {
-    private static final String HOST = "192.168.0.107";
     private static final int PORT = 55556;
-    Socket sock;
+    ServerSocket serverSocket;
+    Socket socket;
     BufferedOutputStream bos;
     DataOutputStream dos;
     private boolean isConnected = false;
@@ -23,10 +24,14 @@ public class Communicator extends AsyncTask<Void, Void, Boolean> {
     @Override
     protected Boolean doInBackground(Void... params) {
         try {
-            Log.i(MainActivity.TAG,"Trying to connect to " + HOST + ":" + PORT);
-            sock = new Socket(HOST, PORT);
-            Log.i(MainActivity.TAG,"Connected:" + sock);
-            bos = new BufferedOutputStream(sock.getOutputStream());
+            serverSocket = new ServerSocket(PORT);
+        } catch (IOException e) {
+            Log.e(MainActivity.TAG,"Cannot initiate server:" + e.toString());
+            e.printStackTrace();
+        }
+        try {
+            socket = serverSocket.accept();
+            bos = new BufferedOutputStream(socket.getOutputStream());
             dos = new DataOutputStream(bos);
             return true;
         } catch(IOException ioe) {
@@ -51,7 +56,8 @@ public class Communicator extends AsyncTask<Void, Void, Boolean> {
 
     void close() throws IOException {
         bos.close();
-        sock.close();
+        socket.close();
+        serverSocket.close();
     }
 
     BufferedOutputStream getBufferedOutputStream() {

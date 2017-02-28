@@ -7,7 +7,6 @@ import java.awt.event.WindowEvent;
 import java.awt.image.BufferedImage;
 import java.io.BufferedInputStream;
 import java.io.DataInputStream;
-import java.net.ServerSocket;
 import java.net.Socket;
  
 import javax.swing.JFrame;
@@ -23,10 +22,10 @@ import javax.swing.SwingUtilities;
  * @author rics
  */
 public class VideoStreamReceiverDesktop {
+    private static final String HOST = "192.168.0.101";
     private static final int PORT = 55556;
  
-    private ServerSocket ss;
-    private Socket sock;
+    private Socket socket;
     private int width;
     private int height;
     private int numPixels;
@@ -42,11 +41,8 @@ public class VideoStreamReceiverDesktop {
  
     public VideoStreamReceiverDesktop() {  
         try {
-            ss = new ServerSocket(PORT);
-            System.out.println("before accept");
-            sock = ss.accept();
-            System.out.println("after accept");
-            bis = new BufferedInputStream(sock.getInputStream());
+            socket = new Socket(HOST,PORT);
+            bis = new BufferedInputStream(socket.getInputStream());
             dis = new DataInputStream(bis);
         } catch (Exception e) {
             System.err.println("Failed to connect: " + e);
@@ -76,8 +72,7 @@ public class VideoStreamReceiverDesktop {
     public void close() {
         try {
             if (bis != null) bis.close();
-            if (sock != null) sock.close();
-            if (ss != null) ss.close();
+            if (socket != null) socket.close();
         } catch (Exception e1) {
             System.err.println("Exception closing window: " + e1);
         }
