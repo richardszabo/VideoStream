@@ -46,6 +46,7 @@ public class VideoStreamReceiverDesktop {
     private JFrame frame;
     private JTextField ipTextField;
     private JButton connectButton;
+    boolean isConnected;
   
     private void createAndShowGUI() {
         frame = new JFrame("EV3 Camera View");
@@ -57,7 +58,11 @@ public class VideoStreamReceiverDesktop {
         connectButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                new ImageUpdater().execute();
+                if( !isConnected ) {
+                    new ImageUpdater().execute();
+                } else {
+                    close();
+                }
             }
         });
         frame.add(connectButton);
@@ -86,6 +91,9 @@ public class VideoStreamReceiverDesktop {
         try {
             if (bis != null) bis.close();
             if (socket != null) socket.close();
+            isConnected = false;
+            System.out.println("Disconnected");            
+            connectButton.setText("Connect");            
         } catch (Exception e1) {
             System.err.println("Exception closing window: " + e1);
         }
@@ -96,7 +104,9 @@ public class VideoStreamReceiverDesktop {
             socket = new Socket(ipTextField.getText(),PORT);
             bis = new BufferedInputStream(socket.getInputStream());
             dis = new DataInputStream(bis);
+            isConnected = true;
             System.out.println("Connected");
+            connectButton.setText("Disconnect");
             return true;
         } catch (Exception e) {
             System.err.println("Failed to connect: " + e);
@@ -122,7 +132,7 @@ public class VideoStreamReceiverDesktop {
     }
     
     private void receiveImages() {        
-        while(true) {
+        while(isConnected) {
             synchronized (this) {
                 try {
                     int offset = 0;
