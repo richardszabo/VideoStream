@@ -71,6 +71,9 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     protected void onPause() {
         super.onPause();
         if( hasRights && mediaRecorderWrapper != null ) {
+            if( mediaRecorderWrapper.isRecording() ) {
+                mediaRecorderWrapper.stopRecording();
+            }
             mediaRecorderWrapper.stopPreview();
         }
     }
