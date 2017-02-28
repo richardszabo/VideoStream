@@ -7,6 +7,12 @@
     android:layout_height="fill_parent"
     tools:context="hu.rics.videostreamandroid.MainActivity">
 
+    <TextView
+        android:text="IP"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:id="@+id/ipTextView" />
+
     <Button
         android:text="Start"
         android:layout_width="match_parent"
