@@ -12,6 +12,9 @@ import java.io.OutputStream;
 
 import hu.rics.camera1util.CameraPreview;
 import hu.rics.camera1util.LibraryInfo;
+import hu.rics.camera1util.MediaRecorderWrapper;
+
+import static android.R.attr.width;
 
 /**
  * Created by rics on 2017.02.17..
@@ -20,9 +23,12 @@ public class StreamingCameraPreview extends CameraPreview implements SurfaceHold
 
     Communicator communicator;
     boolean sizeSent;
+    Context context;
+    int rotation;
 
     public StreamingCameraPreview(Context context) {
         super(context);
+        this.context = context;
     }
 
     public void startSend() {
@@ -59,10 +65,19 @@ public class StreamingCameraPreview extends CameraPreview implements SurfaceHold
             try {
                 BufferedOutputStream bos = communicator.getBufferedOutputStream();
                 DataOutputStream dos = communicator.getDataOutputStream();
+                Camera.Size size = camera.getParameters().getPreviewSize();
                 if( !sizeSent ) {
                     if( dos != null ) {
-                        Camera.Size size = camera.getParameters().getPreviewSize();
-                        Log.i(LibraryInfo.TAG,"width: " + size.width + " height: " + size.height);
+
+                        rotation = CameraPreview.getCameraDisplayOrientation(context, MediaRecorderWrapper.CAMERA_ID,camera);
+                        assert rotation % 90 == 0; // assuming that getCameraDisplayOrientation return a multiplier of 90
+                        Log.i(LibraryInfo.TAG,"width: " + size.width + " height: " + size.height + ":" +
+                                CameraPreview.getCameraDisplayOrientation(context, MediaRecorderWrapper.CAMERA_ID,camera));
+                        if( rotation / 90 % 2 != 0 ) {
+                            int tmp = size.width;
+                            size.width = size.height;
+                            size.height = tmp;
+                        }
                         dos.writeInt (size.width);
                         dos.writeInt (size.height);
                         dos.flush();
@@ -70,7 +85,12 @@ public class StreamingCameraPreview extends CameraPreview implements SurfaceHold
                     }
                 } else {
                     if (bos != null) {
-                        bos.write(data);
+                        byte []rotated;
+                        rotated = data;
+                        for( int i = 0; i < rotation/90; ++i ) {
+                            rotated = rotateYUV420Degree90(rotated,size.width,size.height);
+                        }
+                        bos.write(rotated);
                         bos.flush();
                     }
                 }
@@ -78,5 +98,34 @@ public class StreamingCameraPreview extends CameraPreview implements SurfaceHold
                 Log.e(MainActivity.TAG, "Cannot send data:" + ioe.toString());
             }
         }
+    }
+
+    // taken from here: http://stackoverflow.com/a/15775173/21047
+    private byte[] rotateYUV420Degree90(byte[] data, int imageWidth, int imageHeight)
+    {
+        byte [] yuv = new byte[imageWidth*imageHeight*3/2];
+        // Rotate the Y luma
+        int i = 0;
+        for(int x = 0;x < imageWidth;x++)
+        {
+            for(int y = imageHeight-1;y >= 0;y--)
+            {
+                yuv[i] = data[y*imageWidth+x];
+                i++;
+            }
+        }
+        // Rotate the U and V color components
+        i = imageWidth*imageHeight*3/2-1;
+        for(int x = imageWidth-1;x > 0;x=x-2)
+        {
+            for(int y = 0;y < imageHeight/2;y++)
+            {
+                yuv[i] = data[(imageWidth*imageHeight)+(y*imageWidth)+x];
+                i--;
+                yuv[i] = data[(imageWidth*imageHeight)+(y*imageWidth)+(x-1)];
+                i--;
+            }
+        }
+        return yuv;
     }
 }
