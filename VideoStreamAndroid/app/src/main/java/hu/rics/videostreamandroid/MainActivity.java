@@ -38,8 +38,13 @@ public class MainActivity extends AppCompatActivity {
         View.OnClickListener receiverListener = new View.OnClickListener() {
 
             public void onClick(View v) {
-                Toast toast = Toast.makeText(MainActivity.this, "Receiver", Toast.LENGTH_SHORT);
-                toast.show();
+                if( permissionHandler.hasRights() ) {
+                    Intent intent = new Intent(MainActivity.this, MainReceiverActivity.class);
+                    startActivity(intent);
+                } else {
+                    Toast toast = Toast.makeText(MainActivity.this, "No right to start", Toast.LENGTH_SHORT);
+                    toast.show();
+                }
             }
         };
 
