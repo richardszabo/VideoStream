@@ -4,7 +4,6 @@ import android.Manifest;
 import android.app.AlertDialog;
 import android.content.DialogInterface;
 import android.content.pm.PackageManager;
-import android.os.Environment;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
@@ -27,14 +26,11 @@ import java.util.Map;
 
 import hu.rics.camera1util.MediaRecorderWrapper;
 
-public class MainActivity extends AppCompatActivity implements View.OnClickListener {
+public class MainSenderActivity extends AppCompatActivity implements View.OnClickListener {
     public static final String TAG = "VideoStreamAndroid";
     MediaRecorderWrapper mediaRecorderWrapper;
     Button startButton;
     TextView ipTextView;
-    String defaultName = "VideoStreamAndroid";
-    String ext = ".mp4";
-    File sdcardLocation;
     final private int REQUEST_CODE_ASK_MULTIPLE_PERMISSIONS = 123;
     boolean hasRights = false;
     StreamingCameraPreview streamingCameraPreview;
@@ -52,7 +48,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         try {
             ipTextView.setText("IP address:" + getIPAddress(true));
         } catch (SocketException e) {
-            Log.e(MainActivity.TAG,"Cannot get IP address:" + e.toString());
+            Log.e(MainSenderActivity.TAG,"Cannot get IP address:" + e.toString());
             e.printStackTrace();
         }
         startButton = (Button) findViewById(R.id.start_button);
@@ -123,7 +119,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                         new DialogInterface.OnClickListener() {
                             @Override
                             public void onClick(DialogInterface dialog, int which) {
-                                ActivityCompat.requestPermissions(MainActivity.this,permissionsList.toArray(new String[permissionsList.size()]),
+                                ActivityCompat.requestPermissions(MainSenderActivity.this,permissionsList.toArray(new String[permissionsList.size()]),
                                         REQUEST_CODE_ASK_MULTIPLE_PERMISSIONS);
                             }
                         });

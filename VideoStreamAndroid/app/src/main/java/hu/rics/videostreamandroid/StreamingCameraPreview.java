@@ -8,14 +8,11 @@ import android.view.SurfaceHolder;
 import java.io.BufferedOutputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
-import java.io.OutputStream;
 import java.util.Iterator;
 
 import hu.rics.camera1util.CameraPreview;
 import hu.rics.camera1util.LibraryInfo;
 import hu.rics.camera1util.MediaRecorderWrapper;
-
-import static android.R.attr.width;
 
 /**
  * Created by rics on 2017.02.17..
@@ -44,27 +41,27 @@ public class StreamingCameraPreview extends CameraPreview implements SurfaceHold
             communicator = null;
         } catch (IOException e) {
             e.printStackTrace();
-            Log.e(MainActivity.TAG,"cannot close communicator");
+            Log.e(MainSenderActivity.TAG,"cannot close communicator");
         }
     }
 
     @Override
     public void startPreview() {
         super.startPreview();
-        Log.d(MainActivity.TAG,"StreamingCameraPreview.startSending");
+        Log.d(MainSenderActivity.TAG,"StreamingCameraPreview.startSending");
         startSend();
     }
 
     @Override
     public void stopPreview() {
         super.stopPreview();
-        Log.d(MainActivity.TAG,"StreamingCameraPreview.stopSending");
+        Log.d(MainSenderActivity.TAG,"StreamingCameraPreview.stopSending");
         stopSend();
     }
 
     @Override
     public void onPreviewFrame(byte[] data, Camera camera) {
-        Log.d(MainActivity.TAG,"StreamingCameraPreview.onPreviewFrame:" + data.length + ":");
+        Log.d(MainSenderActivity.TAG,"StreamingCameraPreview.onPreviewFrame:" + data.length + ":");
         if( communicator != null ) {
             Iterator<Communicator.StreamingConnection> c = communicator.getConnections().iterator();
             while (c.hasNext() ) {
@@ -102,7 +99,7 @@ public class StreamingCameraPreview extends CameraPreview implements SurfaceHold
                             }
                         }
                     } catch (IOException ioe) {
-                        Log.d(MainActivity.TAG, "Cannot send data:" + ioe.toString());
+                        Log.d(MainSenderActivity.TAG, "Cannot send data:" + ioe.toString());
                         c.remove();
                     }
                 }
