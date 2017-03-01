@@ -14,7 +14,6 @@ import android.widget.Button;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import java.io.File;
 import java.net.InetAddress;
 import java.net.NetworkInterface;
 import java.net.SocketException;
@@ -38,7 +37,7 @@ public class MainSenderActivity extends AppCompatActivity implements View.OnClic
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_main);
+        setContentView(R.layout.activity_main_sender);
         if( requestPermission() ) {
             hasRights = true;
             streamingCameraPreview = new StreamingCameraPreview(this);
