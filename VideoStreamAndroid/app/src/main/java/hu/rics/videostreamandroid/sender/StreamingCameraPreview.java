@@ -1,4 +1,4 @@
-package hu.rics.videostreamandroid;
+package hu.rics.videostreamandroid.sender;
 
 import android.content.Context;
 import android.hardware.Camera;

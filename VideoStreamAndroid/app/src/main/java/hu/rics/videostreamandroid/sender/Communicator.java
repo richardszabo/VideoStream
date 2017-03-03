@@ -1,4 +1,4 @@
-package hu.rics.videostreamandroid;
+package hu.rics.videostreamandroid.sender;
 
 import android.os.AsyncTask;
 import android.util.Log;
@@ -10,6 +10,8 @@ import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.ArrayList;
 import java.util.List;
+
+import hu.rics.videostreamandroid.sender.MainSenderActivity;
 
 /**
  * Created by rics on 2017.01.31..

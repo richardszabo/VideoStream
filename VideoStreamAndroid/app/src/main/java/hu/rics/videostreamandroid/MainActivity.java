@@ -7,6 +7,9 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.Toast;
 
+import hu.rics.videostreamandroid.receiver.MainReceiverActivity;
+import hu.rics.videostreamandroid.sender.MainSenderActivity;
+
 public class MainActivity extends AppCompatActivity {
 
     PermissionHandler permissionHandler;
