@@ -5,10 +5,8 @@ import android.os.Bundle;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
-import android.widget.Toast;
 
 import hu.rics.videostreamandroid.R;
-import hu.rics.videostreamandroid.sender.Communicator;
 
 
 public class MainReceiverActivity extends AppCompatActivity implements View.OnClickListener {

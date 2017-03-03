@@ -20,7 +20,7 @@ import hu.rics.videostreamandroid.MainActivity;
  */
 public class StreamingCameraPreview extends CameraPreview implements SurfaceHolder.Callback, Camera.PreviewCallback {
 
-    Communicator communicator;
+    SenderCommunicator senderCommunicator;
     Context context;
     int rotation;
 
@@ -30,19 +30,19 @@ public class StreamingCameraPreview extends CameraPreview implements SurfaceHold
     }
 
     public void startSend() {
-        communicator = new Communicator();
-        communicator.execute();
+        senderCommunicator = new SenderCommunicator();
+        senderCommunicator.execute();
     }
 
     public void stopSend() {
         try {
-            if( communicator != null ) {
-                communicator.close();
+            if( senderCommunicator != null ) {
+                senderCommunicator.close();
             }
-            communicator = null;
+            senderCommunicator = null;
         } catch (IOException e) {
             e.printStackTrace();
-            Log.e(MainActivity.TAG,"cannot close communicator");
+            Log.e(MainActivity.TAG,"cannot close senderCommunicator");
         }
     }
 
@@ -63,10 +63,10 @@ public class StreamingCameraPreview extends CameraPreview implements SurfaceHold
     @Override
     public void onPreviewFrame(byte[] data, Camera camera) {
         Log.d(MainActivity.TAG,"StreamingCameraPreview.onPreviewFrame:" + data.length + ":");
-        if( communicator != null ) {
-            Iterator<Communicator.StreamingConnection> c = communicator.getConnections().iterator();
+        if( senderCommunicator != null ) {
+            Iterator<SenderCommunicator.StreamingConnection> c = senderCommunicator.getConnections().iterator();
             while (c.hasNext() ) {
-                Communicator.StreamingConnection connection = c.next();
+                SenderCommunicator.StreamingConnection connection = c.next();
                 if( connection != null ) {
                     BufferedOutputStream bos = connection.getBufferedOutputStream();
                     DataOutputStream dos = connection.getDataOutputStream();

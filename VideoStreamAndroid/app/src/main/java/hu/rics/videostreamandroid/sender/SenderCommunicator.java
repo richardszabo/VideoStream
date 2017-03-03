@@ -17,7 +17,7 @@ import hu.rics.videostreamandroid.MainActivity;
  * Created by rics on 2017.01.31..
  */
 
-public class Communicator extends AsyncTask<Void, Void, Void> {
+public class SenderCommunicator extends AsyncTask<Void, Void, Void> {
     private static final int PORT = 55556;
     ServerSocket serverSocket;
     List<StreamingConnection> connections = new ArrayList<>();
