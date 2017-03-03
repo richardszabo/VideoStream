@@ -20,6 +20,7 @@ import hu.rics.videostreamandroid.sender.MainSenderActivity;
 
 import static android.R.attr.width;
 import static android.hardware.Camera.open;
+import static hu.rics.videostreamandroid.R.id.sizeSpinner;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -35,7 +36,10 @@ public class MainActivity extends AppCompatActivity {
         permissionHandler.requestPermission();
 
         final Spinner sizeSpinner = (Spinner) findViewById(R.id.sizeSpinner);
-        List<Camera.Size> sizes = Camera.open(MediaRecorderWrapper.CAMERA_ID).getParameters().getSupportedPreviewSizes();
+        Camera camera = Camera.open(MediaRecorderWrapper.CAMERA_ID);
+        List<Camera.Size> sizes = camera.getParameters().getSupportedPreviewSizes();
+        camera.release();
+        camera = null;
         List<PreviewCameraSize> psizes = new ArrayList<>();
         for(Camera.Size size : sizes) {
             psizes.add(new PreviewCameraSize(size.width,size.height));
