@@ -13,12 +13,6 @@
         android:layout_height="wrap_content"
         android:id="@+id/ipTextView" />
 
-    <Button
-        android:text="Start"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:id="@+id/start_button" />
-
     <FrameLayout
         android:id="@+id/camera_preview"
         android:layout_width="fill_parent"

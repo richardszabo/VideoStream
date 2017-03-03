@@ -17,9 +17,8 @@ import hu.rics.camera1util.MediaRecorderWrapper;
 import hu.rics.videostreamandroid.MainActivity;
 import hu.rics.videostreamandroid.R;
 
-public class MainSenderActivity extends AppCompatActivity implements View.OnClickListener {
+public class MainSenderActivity extends AppCompatActivity {
     MediaRecorderWrapper mediaRecorderWrapper;
-    Button startButton;
     TextView ipTextView;
     StreamingCameraPreview streamingCameraPreview;
 
@@ -37,8 +36,6 @@ public class MainSenderActivity extends AppCompatActivity implements View.OnClic
             Log.e(MainActivity.TAG,"Cannot get IP address:" + e.toString());
             e.printStackTrace();
         }
-        startButton = (Button) findViewById(R.id.start_button);
-        startButton.setOnClickListener(this);
     }
 
     @Override
@@ -59,21 +56,6 @@ public class MainSenderActivity extends AppCompatActivity implements View.OnClic
         if( mediaRecorderWrapper != null ) {
             mediaRecorderWrapper.stopPreview();
         }
-    }
-
-    @Override
-    public void onClick(View v) {
-        /*if( !(hasRights && mediaRecorderWrapper != null) ) {
-            return;
-        }
-        if( mediaRecorderWrapper.isPreview() ) {
-            mediaRecorderWrapper.stopPreview();
-            startButton.setText("Start");
-            finish();
-        } else {
-            mediaRecorderWrapper.startPreview();
-            startButton.setText("Stop");
-        }*/
     }
 
     /**
