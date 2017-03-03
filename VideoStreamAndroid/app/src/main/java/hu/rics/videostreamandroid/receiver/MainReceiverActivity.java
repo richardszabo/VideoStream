@@ -5,6 +5,7 @@ import android.os.Bundle;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ImageView;
 
 import hu.rics.videostreamandroid.R;
 
@@ -16,6 +17,7 @@ public class MainReceiverActivity extends AppCompatActivity implements View.OnCl
 
     EditText ipEditText;
     Button connectButton;
+    ImageView imageView;
 
 
     @Override
@@ -25,6 +27,8 @@ public class MainReceiverActivity extends AppCompatActivity implements View.OnCl
 
         ipEditText = (EditText) findViewById(R.id.ipEditText);
         ipEditText.setText(DEFAULT_HOST);
+
+        imageView = (ImageView) findViewById(R.id.imageView);
 
         connectButton = (Button) findViewById(R.id.connectButton);
         connectButton.setOnClickListener(this);
@@ -36,7 +40,7 @@ public class MainReceiverActivity extends AppCompatActivity implements View.OnCl
             receiverCommunicator.close();
             connectButton.setText("Connect");
         } else {
-            receiverCommunicator = new ReceiverCommunicator();
+            receiverCommunicator = new ReceiverCommunicator(imageView);
             receiverCommunicator.execute(ipEditText.getText().toString());
             connectButton.setText("Disconnect");
         }
