@@ -45,6 +45,10 @@ public class MainSenderActivity extends AppCompatActivity implements View.OnClic
     public void onResume() {
         super.onResume();
         if( mediaRecorderWrapper != null ) {
+            int size[] = getIntent().getIntArrayExtra("previewsize");
+            if( size != null && size.length == 2 ) {
+                streamingCameraPreview.setPreviewSize(size[0], size[1]);
+            }
             mediaRecorderWrapper.startPreview();
         }
     }

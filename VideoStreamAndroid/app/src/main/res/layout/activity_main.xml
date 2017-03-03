@@ -10,21 +10,36 @@
     android:paddingTop="@dimen/activity_vertical_margin"
     tools:context="hu.rics.videostreamandroid.MainActivity">
 
-    <Button
-        android:text="Send"
+    <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_alignParentTop="true"
-        android:layout_alignParentLeft="true"
-        android:layout_alignParentStart="true"
-        android:id="@+id/senderButton" />
+        android:orientation="vertical"
+        android:id="@+id/senderLayout"
+        android:background="@drawable/layoutborder">
+
+        <Spinner
+            android:id="@+id/sizeSpinner"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content" />
+
+        <Button
+            android:id="@+id/senderButton"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_alignParentLeft="true"
+            android:layout_alignParentStart="true"
+            android:layout_alignParentTop="true"
+            android:text="Send" />
+    </LinearLayout>
 
     <Button
         android:text="Receive"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_below="@+id/senderButton"
+        android:layout_below="@+id/senderLayout"
+        android:layout_marginTop="10pt"
         android:layout_alignParentLeft="true"
         android:layout_alignParentStart="true"
         android:id="@+id/receiverButton" />
+
 </RelativeLayout>
