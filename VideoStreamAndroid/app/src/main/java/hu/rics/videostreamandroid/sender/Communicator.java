@@ -11,7 +11,7 @@ import java.net.Socket;
 import java.util.ArrayList;
 import java.util.List;
 
-import hu.rics.videostreamandroid.sender.MainSenderActivity;
+import hu.rics.videostreamandroid.MainActivity;
 
 /**
  * Created by rics on 2017.01.31..
@@ -27,7 +27,7 @@ public class Communicator extends AsyncTask<Void, Void, Void> {
         try {
             serverSocket = new ServerSocket(PORT);
         } catch (IOException e) {
-            Log.e(MainSenderActivity.TAG,"Cannot initiate server:" + e.toString());
+            Log.e(MainActivity.TAG,"Cannot initiate server:" + e.toString());
             e.printStackTrace();
         }
         while(true) {
@@ -35,7 +35,7 @@ public class Communicator extends AsyncTask<Void, Void, Void> {
                 Socket socket = serverSocket.accept();
                 connections.add(new StreamingConnection(socket));
             } catch (IOException ioe) {
-                Log.d(MainSenderActivity.TAG, "Cannot connect new client:" + ioe.toString());
+                Log.d(MainActivity.TAG, "Cannot connect new client:" + ioe.toString());
                 break;
             }
         }
@@ -60,7 +60,7 @@ public class Communicator extends AsyncTask<Void, Void, Void> {
             try {
                 bos = new BufferedOutputStream(socket.getOutputStream());
             } catch (IOException e) {
-                Log.e(MainSenderActivity.TAG,"Cannot connect:" + e.toString());
+                Log.e(MainActivity.TAG,"Cannot connect:" + e.toString());
                 e.printStackTrace();
             }
             dos = new DataOutputStream(bos);

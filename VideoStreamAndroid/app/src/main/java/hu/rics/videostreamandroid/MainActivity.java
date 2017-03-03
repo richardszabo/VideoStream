@@ -12,6 +12,7 @@ import hu.rics.videostreamandroid.sender.MainSenderActivity;
 
 public class MainActivity extends AppCompatActivity {
 
+    public static final String TAG = "VideoStreamAndroid";
     PermissionHandler permissionHandler;
 
     @Override

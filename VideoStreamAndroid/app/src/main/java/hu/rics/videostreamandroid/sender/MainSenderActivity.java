@@ -14,10 +14,10 @@ import java.util.Collections;
 import java.util.List;
 
 import hu.rics.camera1util.MediaRecorderWrapper;
+import hu.rics.videostreamandroid.MainActivity;
 import hu.rics.videostreamandroid.R;
 
 public class MainSenderActivity extends AppCompatActivity implements View.OnClickListener {
-    public static final String TAG = "VideoStreamAndroid";
     MediaRecorderWrapper mediaRecorderWrapper;
     Button startButton;
     TextView ipTextView;
@@ -34,7 +34,7 @@ public class MainSenderActivity extends AppCompatActivity implements View.OnClic
         try {
             ipTextView.setText("IP address:" + getIPAddress(true));
         } catch (SocketException e) {
-            Log.e(MainSenderActivity.TAG,"Cannot get IP address:" + e.toString());
+            Log.e(MainActivity.TAG,"Cannot get IP address:" + e.toString());
             e.printStackTrace();
         }
         startButton = (Button) findViewById(R.id.start_button);
