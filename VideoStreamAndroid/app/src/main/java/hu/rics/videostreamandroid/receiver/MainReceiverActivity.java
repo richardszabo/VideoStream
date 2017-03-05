@@ -40,7 +40,7 @@ public class MainReceiverActivity extends AppCompatActivity implements View.OnCl
             receiverCommunicator.close();
             connectButton.setText("Connect");
         } else {
-            receiverCommunicator = new ReceiverCommunicator(imageView);
+            receiverCommunicator = new ReceiverCommunicator(this, imageView);
             receiverCommunicator.execute(ipEditText.getText().toString());
             connectButton.setText("Disconnect");
         }

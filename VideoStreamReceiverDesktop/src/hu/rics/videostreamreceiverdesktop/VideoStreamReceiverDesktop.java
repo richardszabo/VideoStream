@@ -139,7 +139,9 @@ public class VideoStreamReceiverDesktop {
                     while (offset < bufferSize) {
                         offset += bis.read(buffer, offset, bufferSize - offset);
                     }
+                    long start = System.currentTimeMillis();
                     decodeYUV420SP(image,buffer,width,height);
+                    System.out.println("decode time:" + (System.currentTimeMillis()-start));
                 } catch (Exception e) {
                     break;
                 }

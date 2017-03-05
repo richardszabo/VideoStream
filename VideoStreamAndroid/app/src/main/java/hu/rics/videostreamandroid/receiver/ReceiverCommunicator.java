@@ -1,8 +1,14 @@
 package hu.rics.videostreamandroid.receiver;
 
+import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.os.AsyncTask;
+import android.renderscript.Allocation;
+import android.renderscript.Element;
+import android.renderscript.RenderScript;
+import android.renderscript.ScriptIntrinsicYuvToRGB;
+import android.renderscript.Type;
 import android.support.annotation.Dimension;
 import android.util.Log;
 import android.widget.ImageView;
@@ -36,9 +42,11 @@ public class ReceiverCommunicator extends AsyncTask<String, Bitmap, Void> {
     private int bufferSize;
     private byte[] buffer;
     private int[] rgbBuffer;
+    private Context context;
     private ImageView imageView;
 
-    public ReceiverCommunicator(ImageView imageView) {
+    public ReceiverCommunicator(Context context, ImageView imageView) {
+        this.context = context;
         this.imageView = imageView;
     }
 
@@ -96,7 +104,10 @@ public class ReceiverCommunicator extends AsyncTask<String, Bitmap, Void> {
                     while (offset < bufferSize) {
                         offset += bis.read(buffer, offset, bufferSize - offset);
                     }
+                    long start = System.currentTimeMillis();
                     decodeYUV420SP(rgbBuffer,buffer,width,height);
+                    //decodeYUV420SPRenderScript(context,rgbBuffer,buffer,width,height);
+                    Log.i(MainActivity.TAG,"decode time:" + (System.currentTimeMillis()-start));
                     Bitmap bitmap = Bitmap.createBitmap(rgbBuffer,width,height,Bitmap.Config.RGB_565);
                     publishProgress(bitmap);
                 } catch (Exception e) {
@@ -108,7 +119,7 @@ public class ReceiverCommunicator extends AsyncTask<String, Bitmap, Void> {
 
     // convertYUVtoARGB is taken from here:
     // https://en.wikipedia.org/wiki/YUV#Y.E2.80.B2UV420sp_.28NV21.29_to_RGB_conversion_.28Android.29
-    private int convertYUVtoARGB(int y, int u, int v) {
+    private static int convertYUVtoARGB(int y, int u, int v) {
         // converting to unsigned int
         y = 0xFF & y;
         u = 0xFF & u;
@@ -127,7 +138,7 @@ public class ReceiverCommunicator extends AsyncTask<String, Bitmap, Void> {
     // YUV420SP aka NV21 pixel layout per channel is the following (for a 16 pixel image):
     // 0123456789ABCDEF01234567
     // YYYYYYYYYYYYYYYYVUVUVUVU
-    private void decodeYUV420SP(int[] rgb, byte[] yuv420sp, int width, int height) {
+    private static void decodeYUV420SP(int[] rgb, byte[] yuv420sp, int width, int height) {
         for (int i = 0; i < height; ++i ) {
             for( int j = 0; j < width; ++j) {
                 int y = yuv420sp[i * width + j];
@@ -138,6 +149,22 @@ public class ReceiverCommunicator extends AsyncTask<String, Bitmap, Void> {
         }
     }
 
+    /*private static void decodeYUV420SPRenderScript(Context context, int[] rgb, byte[] yuv420sp, int width, int height) {
+        RenderScript rs = RenderScript.create(context);
+        ScriptIntrinsicYuvToRGB yuvToRgbIntrinsic = ScriptIntrinsicYuvToRGB.create(rs, Element.U8_4(rs));
+
+        Type.Builder yuvType = new Type.Builder(rs, Element.U8(rs)).setX(yuv420sp.length);
+        Allocation in = Allocation.createTyped(rs, yuvType.create(), Allocation.USAGE_SCRIPT);
+
+        Type.Builder rgbaType = new Type.Builder(rs, Element.RGBA_8888(rs)).setX(width).setY(height);
+        Allocation out = Allocation.createTyped(rs, rgbaType.create(), Allocation.USAGE_SCRIPT);
+
+        in.copyFrom(yuv420sp);
+
+        yuvToRgbIntrinsic.setInput(in);
+        yuvToRgbIntrinsic.forEach(out);
+        out.copyTo(rgb);
+    }*/
 
     void close() {
         try {
