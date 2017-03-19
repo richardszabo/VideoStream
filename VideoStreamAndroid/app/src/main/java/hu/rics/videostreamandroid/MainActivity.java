@@ -18,6 +18,7 @@ import java.util.List;
 import hu.rics.camera1util.MediaRecorderWrapper;
 import hu.rics.videostreamandroid.receiver.MainReceiverActivity;
 import hu.rics.videostreamandroid.sender.MainSenderActivity;
+import hu.rics.permissionhandler.PermissionHandler;
 
 import static android.R.attr.width;
 import static android.hardware.Camera.open;

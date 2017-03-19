@@ -1,3 +1,5 @@
 include ':app'
 include ':camera1util'
 project(':camera1util').projectDir = new File('../../Camera1Util/camera1util')
+include ':permissionhandler'
+project(':permissionhandler').projectDir = new File('../../PermissionHandlerLibrary/permissionhandler')

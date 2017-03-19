@@ -9,6 +9,7 @@
         <option name="modules">
           <set>
             <option value="$PROJECT_DIR$/../../Camera1Util/camera1util" />
+            <option value="$PROJECT_DIR$/../../PermissionHandlerLibrary/permissionhandler" />
             <option value="$PROJECT_DIR$" />
             <option value="$PROJECT_DIR$/app" />
           </set>
