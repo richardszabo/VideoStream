@@ -1,5 +1,6 @@
 package hu.rics.videostreamandroid;
 
+import android.Manifest;
 import android.content.Intent;
 import android.hardware.Camera;
 import android.support.v7.app.AppCompatActivity;
@@ -26,6 +27,13 @@ public class MainActivity extends AppCompatActivity {
 
     public static final String TAG = "VideoStreamAndroid";
     PermissionHandler permissionHandler;
+    String permissions[] = {
+        Manifest.permission.CAMERA,
+        Manifest.permission.WRITE_EXTERNAL_STORAGE,
+        Manifest.permission.RECORD_AUDIO,
+        Manifest.permission.INTERNET
+    };
+    Spinner sizeSpinner;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -33,19 +41,8 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
 
         permissionHandler = new PermissionHandler(this);
-        permissionHandler.requestPermission();
-
-        final Spinner sizeSpinner = (Spinner) findViewById(R.id.sizeSpinner);
-        Camera camera = Camera.open(MediaRecorderWrapper.CAMERA_ID);
-        List<Camera.Size> sizes = camera.getParameters().getSupportedPreviewSizes();
-        camera.release();
-        camera = null;
-        List<PreviewCameraSize> psizes = new ArrayList<>();
-        for(Camera.Size size : sizes) {
-            psizes.add(new PreviewCameraSize(size.width,size.height));
-        }
-        ArrayAdapter<PreviewCameraSize> adapter = new ArrayAdapter<>(this, android.R.layout.simple_spinner_dropdown_item, psizes);
-        sizeSpinner.setAdapter(adapter);
+        permissionHandler.requestPermission(permissions);
+        sizeSpinner = (Spinner) findViewById(R.id.sizeSpinner);
 
         View.OnClickListener senderListener = new View.OnClickListener() {
 
@@ -86,6 +83,19 @@ public class MainActivity extends AppCompatActivity {
     @Override
     public void onRequestPermissionsResult(int requestCode, String[] permissions, int[] grantResults) {
         permissionHandler.onRequestPermissionsResult( requestCode, permissions, grantResults);
+
+        if( permissionHandler.hasRights() ) {
+            Camera camera = Camera.open(MediaRecorderWrapper.CAMERA_ID);
+            List<Camera.Size> sizes = camera.getParameters().getSupportedPreviewSizes();
+            camera.release();
+            camera = null;
+            List<PreviewCameraSize> psizes = new ArrayList<>();
+            for (Camera.Size size : sizes) {
+                psizes.add(new PreviewCameraSize(size.width, size.height));
+            }
+            ArrayAdapter<PreviewCameraSize> adapter = new ArrayAdapter<>(this, android.R.layout.simple_spinner_dropdown_item, psizes);
+            sizeSpinner.setAdapter(adapter);
+        }
     }
 
     class PreviewCameraSize {

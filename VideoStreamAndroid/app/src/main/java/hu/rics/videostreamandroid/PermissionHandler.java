@@ -12,6 +12,7 @@ import android.util.Log;
 import android.widget.Toast;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -26,51 +27,43 @@ public class PermissionHandler {
     final private int REQUEST_CODE_ASK_MULTIPLE_PERMISSIONS = 123;
     private Activity activity;
     private boolean hasRights = false;
+    List<String> allPermissions;
+    List<String> permissionsMissing;
 
     public PermissionHandler(Activity activity) {
         this.activity = activity;
     }
 
-    public boolean requestPermission() {
+    public boolean requestPermission(String[] permissionsNeeded) {
         // permission check (https://inthecheesefactory.com/blog/things-you-need-to-know-about-android-m-permission-developer-edition/en)
-        List<String> permissionsNeeded = new ArrayList<>();
+        allPermissions = new ArrayList<>(Arrays.asList(permissionsNeeded));
+        permissionsMissing = new ArrayList<>();
 
-        final List<String> permissionsList = new ArrayList<>();
-        if (!addPermission(permissionsList, Manifest.permission.CAMERA)) {
-            Log.i(TAG,"permissionsNeeded.add(\"Camera\");");
-            permissionsNeeded.add("Camera");
+        final List<String> permissionsHave = new ArrayList<>();
+        for( String permission : allPermissions ) {
+            if (!addPermission(permissionsHave, permission)) {
+                Log.i(TAG,"permissions missing:" + permission);
+                permissionsMissing.add(permission);
+            }
         }
-        if (!addPermission(permissionsList, Manifest.permission.WRITE_EXTERNAL_STORAGE)) {
-            Log.i(TAG,"permissionsNeeded.add(\"Storage\");");
-            permissionsNeeded.add("External storage");
-        }
-
-        if (!addPermission(permissionsList, Manifest.permission.RECORD_AUDIO)) {
-            Log.i(TAG,"permissionsNeeded.add(\"Audio\");");
-            permissionsNeeded.add("Audio");
-        }
-        if (!addPermission(permissionsList, Manifest.permission.INTERNET)) {
-            Log.i(TAG,"permissionsNeeded.add(\"Internet\");");
-            permissionsNeeded.add("Internet");
-        }
-        Log.i(TAG,"permissions - current: " + permissionsList.size() + " needed:" + permissionsNeeded.size());
-        if (permissionsList.size() > 0) {
-            if (permissionsNeeded.size() > 0) {
+        Log.i(TAG,"permissions - current: " + permissionsHave.size() + " missing:" + permissionsMissing.size());
+        if (permissionsHave.size() > 0) {
+            if (permissionsMissing.size() > 0) {
                 // Need Rationale
-                String message = "You need to grant access to " + permissionsNeeded.get(0);
-                for (int i = 1; i < permissionsNeeded.size(); i++)
-                    message = message + ", " + permissionsNeeded.get(i);
+                String message = "You need to grant access to " + permissionsMissing.get(0);
+                for (int i = 1; i < permissionsMissing.size(); i++)
+                    message = message + ", " + permissionsMissing.get(i);
                 showMessageOKCancel(message,
                         new DialogInterface.OnClickListener() {
                             @Override
                             public void onClick(DialogInterface dialog, int which) {
-                                ActivityCompat.requestPermissions(activity,permissionsList.toArray(new String[permissionsList.size()]),
+                                ActivityCompat.requestPermissions(activity,permissionsHave.toArray(new String[permissionsHave.size()]),
                                         REQUEST_CODE_ASK_MULTIPLE_PERMISSIONS);
                             }
                         });
                 return false;
             }
-            ActivityCompat.requestPermissions(activity,permissionsList.toArray(new String[permissionsList.size()]),
+            ActivityCompat.requestPermissions(activity,permissionsHave.toArray(new String[permissionsHave.size()]),
                     REQUEST_CODE_ASK_MULTIPLE_PERMISSIONS);
             return false;
         } else {
@@ -99,26 +92,21 @@ public class PermissionHandler {
                 .show();
     }
 
-    public void onRequestPermissionsResult(int requestCode, String[] permissions, int[] grantResults) {
+    public void onRequestPermissionsResult(int requestCode, String[] permissionsRequested, int[] grantResults) {
         switch (requestCode) {
             case REQUEST_CODE_ASK_MULTIPLE_PERMISSIONS:
             {
                 Map<String, Integer> perms = new HashMap<>();
                 // Initial
-                perms.put(Manifest.permission.CAMERA, PackageManager.PERMISSION_GRANTED);
-                perms.put(Manifest.permission.WRITE_EXTERNAL_STORAGE, PackageManager.PERMISSION_GRANTED);
-                perms.put(Manifest.permission.RECORD_AUDIO, PackageManager.PERMISSION_GRANTED);
-                perms.put(Manifest.permission.INTERNET, PackageManager.PERMISSION_GRANTED);
-                // Fill with results
-                for (int i = 0; i < permissions.length; i++) {
-                    Log.i(TAG,"i:" + i + ":" + permissions[i] + ":" + grantResults[i] );
-                    perms.put(permissions[i], grantResults[i]);
+                for(String permission : allPermissions) {
+                    perms.put(permission, PackageManager.PERMISSION_GRANTED);
                 }
-                // Check for ACCESS_FINE_LOCATION
-                if( perms.get(Manifest.permission.CAMERA) == PackageManager.PERMISSION_GRANTED
-                        && perms.get(Manifest.permission.WRITE_EXTERNAL_STORAGE) == PackageManager.PERMISSION_GRANTED
-                        && perms.get(Manifest.permission.RECORD_AUDIO) == PackageManager.PERMISSION_GRANTED
-                        && perms.get(Manifest.permission.INTERNET) == PackageManager.PERMISSION_GRANTED) {
+                // Fill with results
+                for (int i = 0; i < permissionsRequested.length; i++) {
+                    Log.i(TAG,"i:" + i + ":" + permissionsRequested[i] + ":" + grantResults[i] );
+                    perms.put(permissionsRequested[i], grantResults[i]);
+                }
+                if( !perms.containsValue(PackageManager.PERMISSION_DENIED) ) {
                     // All PermissionHandler Granted
                     hasRights = true;
                 } else {
