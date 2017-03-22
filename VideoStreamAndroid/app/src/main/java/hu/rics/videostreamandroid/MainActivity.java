@@ -38,10 +38,14 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+        sizeSpinner = (Spinner) findViewById(R.id.sizeSpinner);
 
         permissionHandler = new PermissionHandler(this);
         permissionHandler.requestPermission(permissions);
-        sizeSpinner = (Spinner) findViewById(R.id.sizeSpinner);
+        if( permissionHandler.hasRights() ) {
+            setPreviewOptions();
+        }
+
 
         View.OnClickListener senderListener = new View.OnClickListener() {
 
@@ -82,19 +86,24 @@ public class MainActivity extends AppCompatActivity {
     @Override
     public void onRequestPermissionsResult(int requestCode, String[] permissions, int[] grantResults) {
         permissionHandler.onRequestPermissionsResult( requestCode, permissions, grantResults);
+        Log.i(TAG,"permissionHandler.hasRights():" + permissionHandler.hasRights());
 
         if( permissionHandler.hasRights() ) {
-            Camera camera = Camera.open(MediaRecorderWrapper.CAMERA_ID);
-            List<Camera.Size> sizes = camera.getParameters().getSupportedPreviewSizes();
-            camera.release();
-            camera = null;
-            List<PreviewCameraSize> psizes = new ArrayList<>();
-            for (Camera.Size size : sizes) {
-                psizes.add(new PreviewCameraSize(size.width, size.height));
-            }
-            ArrayAdapter<PreviewCameraSize> adapter = new ArrayAdapter<>(this, android.R.layout.simple_spinner_dropdown_item, psizes);
-            sizeSpinner.setAdapter(adapter);
+            setPreviewOptions();
         }
+    }
+
+    void setPreviewOptions() {
+        Camera camera = Camera.open(MediaRecorderWrapper.CAMERA_ID);
+        List<Camera.Size> sizes = camera.getParameters().getSupportedPreviewSizes();
+        camera.release();
+        camera = null;
+        List<PreviewCameraSize> psizes = new ArrayList<>();
+        for (Camera.Size size : sizes) {
+            psizes.add(new PreviewCameraSize(size.width, size.height));
+        }
+        ArrayAdapter<PreviewCameraSize> adapter = new ArrayAdapter<>(this, android.R.layout.simple_spinner_dropdown_item, psizes);
+        sizeSpinner.setAdapter(adapter);
     }
 
     class PreviewCameraSize {
