@@ -30,8 +30,6 @@ public class MainActivity extends AppCompatActivity {
     PermissionHandler permissionHandler;
     String permissions[] = {
         Manifest.permission.CAMERA,
-        Manifest.permission.WRITE_EXTERNAL_STORAGE,
-        Manifest.permission.RECORD_AUDIO,
         Manifest.permission.INTERNET
     };
     Spinner sizeSpinner;
