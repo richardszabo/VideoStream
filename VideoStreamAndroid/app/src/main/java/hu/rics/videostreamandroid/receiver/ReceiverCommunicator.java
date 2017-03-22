@@ -1,5 +1,6 @@
 package hu.rics.videostreamandroid.receiver;
 
+import android.app.Activity;
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
@@ -42,11 +43,11 @@ public class ReceiverCommunicator extends AsyncTask<String, Bitmap, Void> {
     private int bufferSize;
     private byte[] buffer;
     private int[] rgbBuffer;
-    private Context context;
+    private MainReceiverActivity receiverActivity;
     private ImageView imageView;
 
-    public ReceiverCommunicator(Context context, ImageView imageView) {
-        this.context = context;
+    public ReceiverCommunicator(MainReceiverActivity receiverActivity, ImageView imageView) {
+        this.receiverActivity = receiverActivity;
         this.imageView = imageView;
     }
 
@@ -111,6 +112,13 @@ public class ReceiverCommunicator extends AsyncTask<String, Bitmap, Void> {
                     Bitmap bitmap = Bitmap.createBitmap(rgbBuffer,width,height,Bitmap.Config.RGB_565);
                     publishProgress(bitmap);
                 } catch (Exception e) {
+                    Log.d(MainActivity.TAG,"Connection terminated.");
+                    ((Activity)receiverActivity).runOnUiThread(new Runnable() {
+                        public void run() {
+                            imageView.setImageBitmap(null);
+                            receiverActivity.onClick(null);
+                        }
+                    });
                     break;
                 }
             }

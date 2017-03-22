@@ -36,8 +36,11 @@ public class MainReceiverActivity extends AppCompatActivity implements View.OnCl
 
     @Override
     public void onClick(View v) {
-        if( receiverCommunicator != null && receiverCommunicator.isConnected() ) {
-            receiverCommunicator.close();
+        if( receiverCommunicator != null ) {
+            if( receiverCommunicator.isConnected() ) {
+                receiverCommunicator.close();
+            }
+            receiverCommunicator = null;
             connectButton.setText("Connect");
         } else {
             receiverCommunicator = new ReceiverCommunicator(this, imageView);
