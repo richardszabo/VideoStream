@@ -5,7 +5,7 @@
     android:id="@+id/activity_main"
     android:layout_width="fill_parent"
     android:layout_height="fill_parent"
-    tools:context="hu.rics.videostreamandroid.sender.MainSenderActivity">
+    tools:context="hu.rics.videostreamandroid.sender.SenderActivity">
 
     <TextView
         android:text="IP"

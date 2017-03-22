@@ -10,7 +10,7 @@ import android.widget.ImageView;
 import hu.rics.videostreamandroid.R;
 
 
-public class MainReceiverActivity extends AppCompatActivity implements View.OnClickListener {
+public class ReceiverActivity extends AppCompatActivity implements View.OnClickListener {
     private static final String DEFAULT_HOST = "192.168.0.101";
 
     ReceiverCommunicator receiverCommunicator;

@@ -17,7 +17,7 @@ import hu.rics.camera1util.MediaRecorderWrapper;
 import hu.rics.videostreamandroid.MainActivity;
 import hu.rics.videostreamandroid.R;
 
-public class MainSenderActivity extends AppCompatActivity {
+public class SenderActivity extends AppCompatActivity {
     MediaRecorderWrapper mediaRecorderWrapper;
     TextView ipTextView;
     StreamingCameraPreview streamingCameraPreview;

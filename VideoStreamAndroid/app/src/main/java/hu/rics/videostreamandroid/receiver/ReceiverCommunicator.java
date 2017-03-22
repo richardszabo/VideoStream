@@ -1,34 +1,18 @@
 package hu.rics.videostreamandroid.receiver;
 
 import android.app.Activity;
-import android.content.Context;
 import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.os.AsyncTask;
-import android.renderscript.Allocation;
-import android.renderscript.Element;
-import android.renderscript.RenderScript;
-import android.renderscript.ScriptIntrinsicYuvToRGB;
-import android.renderscript.Type;
-import android.support.annotation.Dimension;
 import android.util.Log;
 import android.widget.ImageView;
 
 import java.io.BufferedInputStream;
-import java.io.BufferedOutputStream;
 import java.io.DataInputStream;
-import java.io.DataOutputStream;
 import java.io.IOException;
-import java.net.ServerSocket;
 import java.net.Socket;
-import java.util.ArrayList;
-import java.util.List;
 
 import hu.rics.videostreamandroid.MainActivity;
-import hu.rics.videostreamandroid.sender.MainSenderActivity;
 
-import static android.R.attr.bitmap;
-import static hu.rics.videostreamandroid.R.id.connectButton;
 
 public class ReceiverCommunicator extends AsyncTask<String, Bitmap, Void> {
     private String host;
@@ -43,10 +27,10 @@ public class ReceiverCommunicator extends AsyncTask<String, Bitmap, Void> {
     private int bufferSize;
     private byte[] buffer;
     private int[] rgbBuffer;
-    private MainReceiverActivity receiverActivity;
+    private ReceiverActivity receiverActivity;
     private ImageView imageView;
 
-    public ReceiverCommunicator(MainReceiverActivity receiverActivity, ImageView imageView) {
+    public ReceiverCommunicator(ReceiverActivity receiverActivity, ImageView imageView) {
         this.receiverActivity = receiverActivity;
         this.imageView = imageView;
     }

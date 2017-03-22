@@ -16,13 +16,11 @@ import java.util.ArrayList;
 import java.util.List;
 
 import hu.rics.camera1util.MediaRecorderWrapper;
-import hu.rics.videostreamandroid.receiver.MainReceiverActivity;
-import hu.rics.videostreamandroid.sender.MainSenderActivity;
+import hu.rics.videostreamandroid.receiver.ReceiverActivity;
+import hu.rics.videostreamandroid.sender.SenderActivity;
 import hu.rics.permissionhandler.PermissionHandler;
 
-import static android.R.attr.width;
 import static android.hardware.Camera.open;
-import static hu.rics.videostreamandroid.R.id.sizeSpinner;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -52,7 +50,7 @@ public class MainActivity extends AppCompatActivity {
             public void onClick(View v) {
                 if( permissionHandler.hasRights() ) {
                     Log.i(TAG,"spinner selection:" + sizeSpinner.getSelectedItem());
-                    Intent intent = new Intent(MainActivity.this, MainSenderActivity.class);
+                    Intent intent = new Intent(MainActivity.this, SenderActivity.class);
                     PreviewCameraSize size = (PreviewCameraSize)sizeSpinner.getSelectedItem();
                     intent.putExtra("previewsize",new int[]{ size.width,size.height});
                     startActivity(intent);
@@ -70,7 +68,7 @@ public class MainActivity extends AppCompatActivity {
 
             public void onClick(View v) {
                 if( permissionHandler.hasRights() ) {
-                    Intent intent = new Intent(MainActivity.this, MainReceiverActivity.class);
+                    Intent intent = new Intent(MainActivity.this, ReceiverActivity.class);
                     startActivity(intent);
                 } else {
                     Toast toast = Toast.makeText(MainActivity.this, "No right to start", Toast.LENGTH_SHORT);
